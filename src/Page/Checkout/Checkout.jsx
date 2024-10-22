@@ -2,14 +2,15 @@ import React, { useContext, useEffect, useState } from "react";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { Link } from "react-router-dom";
 import { CartContext } from "../../ContextAPIs/CartProvider";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const Checkout = () => {
   const { cartItems, dispatch } = useContext(CartContext);
-
   const [totalPrice, setTotalPrice] = useState(0);
   const [formData, setFormData] = useState({
     course_id: 0,
-    admission_date: "",
+    admission_date: new Date().toLocaleDateString("en-CA"),
     name: "",
     father_name: "",
     father_phone_no: "",
@@ -30,7 +31,9 @@ const Checkout = () => {
     total_course_fee: 0,
     discount_course_fee: 0,
     sub_total_course_fee: 0,
+    photo: null,
   });
+
   const calculateSubTotal = (price, quantity) => {
     const subTotal = price * quantity;
     return subTotal;
@@ -47,6 +50,7 @@ const Checkout = () => {
   const handleDecreaseQuantity = (id) => {
     dispatch({ type: "DECREASE_QUANTITY", payload: id });
   };
+
   const calculateTotalPrice = () => {
     const total = cartItems.reduce((acc, item) => {
       return acc + item.discount_price * item.quantity;
@@ -56,14 +60,57 @@ const Checkout = () => {
 
   useEffect(() => {
     calculateTotalPrice();
+
+    if (cartItems.length > 0) {
+      const item = cartItems[0];
+      setFormData({
+        ...formData,
+        course_id: item.id,
+        course_fee: item.regular_price,
+        course_qty: item.quantity,
+        total_course_fee: item.regular_price * item.quantity,
+        discount_course_fee: item.discount_price,
+        sub_total_course_fee: item.discount_price * item.quantity,
+      });
+    }
   }, [cartItems]);
+
   const handleChange = (event) => {
     const { id, value } = event.target;
-    setFormData({ ...formData, [id]: value });
+
+    if (id === "image") {
+      setFormData({ ...formData, image: event.target.files[0] });
+    } else {
+      setFormData({ ...formData, [id]: value });
+    }
   };
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log(formData);
+    try {
+      const accessToken =
+        "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI5ZDRjMWI5NS1mODRiLTRlOTMtOTM0ZC0xYzc3Y2M5MTY0YTMiLCJqdGkiOiI0NmRkYzc2OWFlZDU4ZmVhZmNiOTYyZGNiYmVkYzI2ZDI1NDUzYThlY2IxMWIwYzQyMzc4ZTVmNTZlZTQ4ZTQ4M2JmYTJmZDRhMDM5OWVjMyIsImlhdCI6MTcyOTU4ODUwMy4zOTg2OTEsIm5iZiI6MTcyOTU4ODUwMy4zOTg2OTUsImV4cCI6MTc2MTEyNDUwMy4zODY1NjYsInN1YiI6IjI1Iiwic2NvcGVzIjpbXX0.QrlPmGrZ8Jyqwba1Cwcc6KAbOmmmM7NkEyCRtQzbV7Z6gGcs-uXl15IA92cQVI3sKnp6-x8pAx4H4VPJ8IZLC9Idlsf9_SG7NZq4gI-7fsTpOIk138hmgaZtSAERs4KGAWGGhYJOETcE207lKZHwqYZGVBAZmYua5mtdmFp_VveXEIxTW1yg09EeMsVzKTWV0RlQ5OBOLqI_KqI7Hc3xjTwYBxS3vHzjwGYi-Szbf2wrU0j9iatQ-DP1uDFL0a2ILCd8CQrrs9WT7nTEX7OzpWOsILjvZXDEBOAZpJ6ALPW57arkcrWjF9PgD__9sEvuaelRRVC967QI6-f7LA7xo1oGmsDa2VXjTZV-liasIw_yPh86Vri-mpP3mValYKKclLN8oZhD92qRXbxMZoYeoSW6F5hTK9xrK9-0IsXqj9r2xkSmHGf0ZtTrOo-FztH5wqumZfkoSU4C6Ad3K_k5y-_en5O6CMgOyh9t9jXm97KUgs2yUmDq0JMgUWVY6bqXM2_IhONncudWqXD9wd-U9ULlrk9izzWhFNiS8VOSP36mAvtvXxYj7TfObOM72U7c-w5-pxoR-1EHx7daRbz0ZZfvAqGbz9i8nnAaijiss6BxEKftuPjwFqeK99yc2W3PEdjBvlu3HzKe3s7bwXtoGBMyp8ZnrbFe4cmE9yQ43Tg";
+      const response = await axios.post(
+        "https://itder.com/api/course-purchase",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      toast.success("Order placed successfully!");
+      console.log(response.data);
+    } catch (error) {
+      if (error.response && error.response.data) {
+        toast.error(`Error: ${error.response.data.message}`);
+      } else {
+        toast.error("An error occurred while processing your order.");
+      }
+      console.error(error);
+    }
   };
 
   return (
@@ -85,6 +132,7 @@ const Checkout = () => {
                 Full Name:
               </label>
               <input
+                required
                 type="text"
                 id="name"
                 className="w-full border border-gray-300 rounded-md p-2"
@@ -100,6 +148,7 @@ const Checkout = () => {
                 Father name:
               </label>
               <input
+                required
                 type="text"
                 id="father_name"
                 className="w-full border border-gray-300 rounded-md p-2"
@@ -118,6 +167,7 @@ const Checkout = () => {
                 Father phone no:
               </label>
               <input
+                required
                 type="text"
                 id="father_phone_no"
                 className="w-full border border-gray-300 rounded-md p-2"
@@ -133,6 +183,7 @@ const Checkout = () => {
                 School/collage name:
               </label>
               <input
+                required
                 type="text"
                 id="school_collage_name"
                 className="w-full border border-gray-300 rounded-md p-2"
@@ -151,6 +202,7 @@ const Checkout = () => {
                 Job title:
               </label>
               <input
+                required
                 type="text"
                 id="job_title"
                 className="w-full border border-gray-300 rounded-md p-2"
@@ -166,6 +218,7 @@ const Checkout = () => {
                 Email:
               </label>
               <input
+                required
                 type="text"
                 id="email"
                 className="w-full border border-gray-300 rounded-md p-2"
@@ -184,6 +237,7 @@ const Checkout = () => {
                 Present address:
               </label>
               <textarea
+                required
                 type="email"
                 id="present_address"
                 className="w-full border border-gray-300 rounded-md p-2"
@@ -199,6 +253,7 @@ const Checkout = () => {
                 Permanent address:
               </label>
               <textarea
+                required
                 id="permanent_address"
                 className="w-full border border-gray-300 rounded-md p-2"
                 value={formData.permanent_address}
@@ -216,6 +271,7 @@ const Checkout = () => {
                 Gender:
               </label>
               <select
+                required
                 id="gender"
                 className="w-full border border-gray-300 rounded-md p-2"
                 value={formData.gender || ""}
@@ -237,6 +293,7 @@ const Checkout = () => {
                 Date of Birth:
               </label>
               <input
+                required
                 type="date"
                 id="date_of_birth"
                 className="w-full border border-gray-300 rounded-md p-2"
@@ -255,6 +312,7 @@ const Checkout = () => {
                 NID Number:
               </label>
               <input
+                required
                 type="text"
                 id="nid_no"
                 className="w-full border border-gray-300 rounded-md p-2"
@@ -270,6 +328,7 @@ const Checkout = () => {
                 Mobile No:
               </label>
               <input
+                required
                 type="text"
                 id="phone_no"
                 className="w-full border border-gray-300 rounded-md p-2"
@@ -288,6 +347,7 @@ const Checkout = () => {
                 Local Guardian’s Name:
               </label>
               <input
+                required
                 type="text"
                 id="local_guardian_name"
                 className="w-full border border-gray-300 rounded-md p-2"
@@ -303,6 +363,7 @@ const Checkout = () => {
                 Local Guardian’s Number:
               </label>
               <input
+                required
                 type="text"
                 id="local_guardian_phone_no"
                 className="w-full border border-gray-300 rounded-md p-2"
@@ -321,6 +382,7 @@ const Checkout = () => {
                 Blood Group:
               </label>
               <select
+                required
                 id="blood_group"
                 className="w-full border border-gray-300 rounded-md p-2"
                 value={formData.blood_group || ""}
@@ -339,6 +401,18 @@ const Checkout = () => {
                 <option value="O-">O-</option>
               </select>
             </div>
+          </div>
+          <div className="grid grid-cols-1">
+            <label htmlFor="photo">Image:</label>
+            <input
+              required
+              className="p-3 border border-gray-300 w-full"
+              type="file"
+              id="photo"
+              name="photo"
+              accept="image/*"
+              onChange={handleChange}
+            />
           </div>
         </div>
 
@@ -398,6 +472,7 @@ const Checkout = () => {
                           <div className="flex justify-center">
                             <div className="border">
                               <button
+                                type="button"
                                 className="px-4 w-[30px] font-bold font_standard my-1.5"
                                 onClick={() => handleDecreaseQuantity(item.id)}
                               >
@@ -414,6 +489,7 @@ const Checkout = () => {
                             </div>
                             <div className="border">
                               <button
+                                type="button"
                                 className="px-4 w-[30px] font-bold font_standard my-1.5"
                                 onClick={() => handleIncreaseQuantity(item.id)}
                               >
@@ -446,9 +522,9 @@ const Checkout = () => {
                     <p className="text-black font-bold"></p>
                   </div>
 
-                  <Link className="font-medium text-black mb-2 border-2 hover:bg-[#D2C5A2] duration-300 py-2 px-4  block text-center mx-auto w-full">
+                  <button className="font-medium text-black mb-2 border-2 hover:bg-[#D2C5A2] duration-300 py-2 px-4  block text-center mx-auto w-full">
                     Submit
-                  </Link>
+                  </button>
                 </div>
               </div>
             </div>
