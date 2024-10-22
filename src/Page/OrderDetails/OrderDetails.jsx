@@ -28,12 +28,14 @@ const OrderDetails = () => {
                   <p className="text-start">{purchaseData.name}</p>
                 </div>
                 <div className="flex items-center justify-between">
-                  <p>Country:</p>
-                  <p>{purchaseData.country || "N/A"}</p>
+                  <p>Email:</p>
+                  <p>{purchaseData.email || "N/A"}</p>
                 </div>
                 <div className="flex items-center justify-between">
-                  <p>District Thana:</p>
-                  <p className="text-start">{purchaseData.district || "N/A"}</p>
+                  <p>Job Title:</p>
+                  <p className="text-start">
+                    {purchaseData.job_title || "N/A"}
+                  </p>
                 </div>
                 <div className="flex items-center justify-between">
                   <p>Address:</p>
