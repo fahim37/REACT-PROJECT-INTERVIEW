@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import CoursePagination from "./CoursePagination";
+import { CartContext } from "../../ContextAPIs/CartProvider";
 
 const Courses = () => {
   const [courses, setCourses] = useState([]);
   const [courseLoading, setCourseLoading] = useState(true);
   const [paginatedCourses, setPaginatedCourses] = useState([]);
+  const { dispatch } = useContext(CartContext);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -21,6 +23,10 @@ const Courses = () => {
     };
     fetchCourses();
   }, []);
+
+  const handleAddToCart = (course) => {
+    dispatch({ type: "ADD_TO_CART", payload: course });
+  };
 
   return (
     <div className="m-mt_16px">
@@ -80,7 +86,10 @@ const Courses = () => {
                   </div>
                 </div>
                 <div className="mt-4 flex gap-2">
-                  <button className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-500 w-full font-bold text-md">
+                  <button
+                    className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-500 w-full font-bold text-md"
+                    onClick={() => handleAddToCart(course)}
+                  >
                     Add To Cart
                   </button>
                 </div>
