@@ -1,4 +1,5 @@
 import { createContext, useReducer } from "react";
+import { toast } from "react-toastify";
 
 export const CartContext = createContext();
 
@@ -9,20 +10,13 @@ const initialCartState = {
 const cartReducer = (state, action) => {
   switch (action.type) {
     case "ADD_TO_CART":
-      const existingIndex = state.cartItems.findIndex(
-        (item) => item.id === action.payload.id
-      );
-      if (existingIndex !== -1) {
-        const updatedItems = state.cartItems.map((item, index) =>
-          index === existingIndex
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-        return { ...state, cartItems: updatedItems };
+      if (state.cartItems.length > 0) {
+        toast.warn("You can only add one item to the cart.");
+        return state;
       } else {
         return {
           ...state,
-          cartItems: [...state.cartItems, { ...action.payload, quantity: 1 }],
+          cartItems: [{ ...action.payload, quantity: 1 }],
         };
       }
     case "REMOVE_FROM_CART":

@@ -1,25 +1,14 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { Link } from "react-router-dom";
 import { CartContext } from "../../ContextAPIs/CartProvider";
 
 const Checkout = () => {
   const { cartItems, dispatch } = useContext(CartContext);
-  const calculateSubTotal = (price, quantity) => price * quantity;
-  const handleRemove = (id) => {
-    dispatch({ type: "REMOVE_FROM_CART", payload: id });
-  };
 
-  const handleIncreaseQuantity = (id) => {
-    dispatch({ type: "INCREASE_QUANTITY", payload: id });
-  };
-
-  const handleDecreaseQuantity = (id) => {
-    dispatch({ type: "DECREASE_QUANTITY", payload: id });
-  };
-
+  const [totalPrice, setTotalPrice] = useState(0);
   const [formData, setFormData] = useState({
-    course_id: 3,
+    course_id: 0,
     admission_date: "",
     name: "",
     father_name: "",
@@ -42,15 +31,50 @@ const Checkout = () => {
     discount_course_fee: 0,
     sub_total_course_fee: 0,
   });
-  const handleChange = () => {
-    return null;
+  const calculateSubTotal = (price, quantity) => {
+    const subTotal = price * quantity;
+    return subTotal;
   };
+
+  const handleRemove = (id) => {
+    dispatch({ type: "REMOVE_FROM_CART", payload: id });
+  };
+
+  const handleIncreaseQuantity = (id) => {
+    dispatch({ type: "INCREASE_QUANTITY", payload: id });
+  };
+
+  const handleDecreaseQuantity = (id) => {
+    dispatch({ type: "DECREASE_QUANTITY", payload: id });
+  };
+  const calculateTotalPrice = () => {
+    const total = cartItems.reduce((acc, item) => {
+      return acc + item.discount_price * item.quantity;
+    }, 0);
+    setTotalPrice(total);
+  };
+
+  useEffect(() => {
+    calculateTotalPrice();
+  }, [cartItems]);
+  const handleChange = (event) => {
+    const { id, value } = event.target;
+    setFormData({ ...formData, [id]: value });
+  };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(formData);
+  };
+
   return (
     <div className="  mt-5 border mx-2">
       <div class="bg-[#6f42c1] text-white p-6 text-center mb-5">
         <h2 className="text-5xl font-bold">Trainee Admission Form</h2>
       </div>
-      <form className="bg-white shadow-md rounded-lg p-6">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white shadow-md rounded-lg p-6"
+      >
         <div className="form-section">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
@@ -197,7 +221,7 @@ const Checkout = () => {
                 value={formData.gender || ""}
                 onChange={handleChange}
               >
-                <option value="" disabled selected>
+                <option value="" disabled>
                   Select Gender
                 </option>
                 <option value="Female">Female</option>
@@ -302,7 +326,7 @@ const Checkout = () => {
                 value={formData.blood_group || ""}
                 onChange={handleChange}
               >
-                <option value="" disabled selected>
+                <option value="" disabled>
                   Select Blood Group
                 </option>
                 <option value="A+">A+</option>
@@ -418,14 +442,11 @@ const Checkout = () => {
                     Cart Summary
                   </h2>
                   <div className="py-3 flex justify-between border-b border-gray-300">
-                    <p className="text-black font-bold">Total Price</p>
+                    <p className="text-black font-bold">{totalPrice}</p>
                     <p className="text-black font-bold"></p>
                   </div>
 
-                  <Link
-                    state={"bdt"}
-                    className="font-medium text-black mb-2 border-2 hover:bg-[#D2C5A2] duration-300 py-2 px-4  block text-center mx-auto w-full"
-                  >
+                  <Link className="font-medium text-black mb-2 border-2 hover:bg-[#D2C5A2] duration-300 py-2 px-4  block text-center mx-auto w-full">
                     Submit
                   </Link>
                 </div>
