@@ -117,6 +117,7 @@ const Checkout = () => {
       if (response.data.status_code === 201) {
         console.log("Setting purchase data:", response.coursePurchaseData);
         setPurchaseData(response.data.coursePurchaseData);
+        dispatch({ type: "CLEAR" });
         navigate("/order-details");
       }
       toast.success("Form submitted successfully!");

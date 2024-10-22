@@ -1,33 +1,68 @@
 import React, { useState } from "react";
 import { IoMdSearch } from "react-icons/io";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useContext } from "react";
+import { PurchaseFormContext } from "../../ContextAPIs/PurchaseFormProvider";
 
 const Search = () => {
-    const [searchTerm, setSearchTerm] = useState("");
+  const [formNo, setFormNo] = useState("");
+  const [phoneNo, setPhoneNo] = useState("");
+  const { setPurchaseData } = useContext(PurchaseFormContext);
+  const navigate = useNavigate();
 
-    const handleSearch = () => {
-        // Handle the search logic here
-        console.log("Searching for:", searchTerm);
-    };
+  const handleSearch = async () => {
+    try {
+      const requestData = {
+        form_no: formNo,
+        phone_no: phoneNo,
+      };
 
-    return (
-        <div className="min-h-screen flex flex-col text-text_40px font-bold items-center justify-center">
-            <h1 className="w-[600px] mx-auto">Search here</h1>
-            <div className="h-[52px] relative col-span-4 w-[600px] mx-auto">
-                <input
-                    type="text"
-                    name="search"
-                    placeholder="search"
-                    className="text-black px-2 w-full block h-full outline-0 rounded-[4px] border"
-                />
-                <IoMdSearch
+      const response = await axios.post(
+        "https://itder.com/api/search-purchase-data",
+        requestData
+      );
 
-                    className="text-2xl text-black absolute right-2 top-2"
-                />
-            </div> 
+      if (response.status === 201) {
+        setPurchaseData(response.data.singleCoursePurchaseData);
+        navigate("/order-details");
+      } else {
+        console.error("Error loading purchase data:", response.message);
+      }
+    } catch (error) {
+      console.error("Error during search:", error);
+    }
+  };
 
-        </div>
-         
-    );
+  return (
+    <div className="min-h-screen flex flex-col text-text_40px font-bold items-center justify-center">
+      <h1 className="w-[600px] mx-auto text-center">Search here</h1>
+      <div className="w-[500px] p-2">
+        <input
+          type="text"
+          name="form_no"
+          placeholder="Form Number"
+          value={formNo}
+          onChange={(e) => setFormNo(e.target.value)}
+          className="text-black p-2 w-full block h-full outline-0 rounded-[4px] border"
+        />
+        <input
+          type="text"
+          name="phone_no"
+          placeholder="Phone Number"
+          value={phoneNo}
+          onChange={(e) => setPhoneNo(e.target.value)}
+          className="text-black p-2 w-full block h-full outline-0 rounded-[4px] border mt-2"
+        />
+        <button
+          className="text-2xl text-black cursor-pointer border py-2 w-[485px]"
+          onClick={handleSearch}
+        >
+          Search
+        </button>
+      </div>
+    </div>
+  );
 };
 
 export default Search;
