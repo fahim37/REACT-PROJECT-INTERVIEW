@@ -35,7 +35,7 @@ const Courses = () => {
             >
               <div className="relative">
                 <img
-                  className="h-[500px] w-max object-contained"
+                  className="h-[350px] w-[400px] object-contain"
                   src={course.photo}
                   alt={course.course_name}
                 />
