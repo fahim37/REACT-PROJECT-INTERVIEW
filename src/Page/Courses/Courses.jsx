@@ -7,7 +7,7 @@ const Courses = () => {
   const [courses, setCourses] = useState([]);
   const [courseLoading, setCourseLoading] = useState(true);
   const [paginatedCourses, setPaginatedCourses] = useState([]);
-  const { dispatch } = useContext(CartContext);
+  const { cartItems, dispatch } = useContext(CartContext);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -26,6 +26,9 @@ const Courses = () => {
 
   const handleAddToCart = (course) => {
     dispatch({ type: "ADD_TO_CART", payload: course });
+  };
+  const handleRemove = (id) => {
+    dispatch({ type: "REMOVE_FROM_CART", payload: id });
   };
 
   return (
@@ -86,12 +89,21 @@ const Courses = () => {
                   </div>
                 </div>
                 <div className="mt-4 flex gap-2">
-                  <button
-                    className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-500 w-full font-bold text-md"
-                    onClick={() => handleAddToCart(course)}
-                  >
-                    Add To Cart
-                  </button>
+                  {cartItems.some((i) => i.id === course.id) ? (
+                    <button
+                      className="bg-red-500 text-white py-2 px-4 rounded hover:bg-blue-500 w-full font-bold text-md"
+                      onClick={() => handleRemove(course.id)}
+                    >
+                      Remove From Cart
+                    </button>
+                  ) : (
+                    <button
+                      className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-500 w-full font-bold text-md"
+                      onClick={() => handleAddToCart(course)}
+                    >
+                      Add To Cart
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
