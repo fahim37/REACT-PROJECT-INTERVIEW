@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import CoursePagination from "./CoursePagination";
 
 const Courses = () => {
   const [courses, setCourses] = useState([]);
   const [courseLoading, setCourseLoading] = useState(true);
+  const [paginatedCourses, setPaginatedCourses] = useState([]);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -26,7 +28,7 @@ const Courses = () => {
         {courseLoading ? (
           <p>Loading...</p>
         ) : courses.length > 0 ? (
-          courses.map((course, index) => (
+          paginatedCourses.map((course, index) => (
             <div
               key={index}
               className="bg-white shadow-lg rounded-lg overflow-hidden"
@@ -85,6 +87,12 @@ const Courses = () => {
           <p>No courses available.</p>
         )}
       </div>
+      {courses.length > 0 && (
+        <CoursePagination
+          items={courses}
+          setPaginationItems={setPaginatedCourses}
+        />
+      )}
     </div>
   );
 };
