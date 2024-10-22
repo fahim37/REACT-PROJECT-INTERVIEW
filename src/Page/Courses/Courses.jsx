@@ -91,14 +91,14 @@ const Courses = () => {
                 <div className="mt-4 flex gap-2">
                   {cartItems.some((i) => i.id === course.id) ? (
                     <button
-                      className="bg-red-500 text-white py-2 px-4 rounded hover:bg-blue-500 w-full font-bold text-md"
+                      className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 w-full font-bold text-md"
                       onClick={() => handleRemove(course.id)}
                     >
                       Remove From Cart
                     </button>
                   ) : (
                     <button
-                      className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-500 w-full font-bold text-md"
+                      className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 w-full font-bold text-md"
                       onClick={() => handleAddToCart(course)}
                     >
                       Add To Cart
