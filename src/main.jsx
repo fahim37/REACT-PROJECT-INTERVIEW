@@ -11,6 +11,7 @@ import "primereact/resources/themes/lara-light-cyan/theme.css";
 import BasicProvider from "./ContextAPIs/BasicProvider.jsx";
 import "aos/dist/aos.css";
 import { CartProvider } from "./ContextAPIs/CartProvider.jsx";
+import { PurchaseFormProvider } from "./ContextAPIs/PurchaseFormProvider.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <>
@@ -18,9 +19,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <QueryClientProvider client={queryClient}>
       <OrderProvider>
         <BasicProvider>
-          <CartProvider>
-            <RouterProvider router={Router} />
-          </CartProvider>
+          <PurchaseFormProvider>
+            <CartProvider>
+              <RouterProvider router={Router} />
+            </CartProvider>
+          </PurchaseFormProvider>
         </BasicProvider>
       </OrderProvider>
     </QueryClientProvider>

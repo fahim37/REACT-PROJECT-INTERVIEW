@@ -1,13 +1,16 @@
 import React, { useContext, useEffect, useState } from "react";
 import { RiDeleteBin5Line } from "react-icons/ri";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CartContext } from "../../ContextAPIs/CartProvider";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { PurchaseFormContext } from "../../ContextAPIs/PurchaseFormProvider";
 
 const Checkout = () => {
   const { cartItems, dispatch } = useContext(CartContext);
+  const { setPurchaseData } = useContext(PurchaseFormContext);
   const [totalPrice, setTotalPrice] = useState(0);
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     course_id: 0,
     admission_date: new Date().toLocaleDateString("en-CA"),
@@ -66,10 +69,10 @@ const Checkout = () => {
       setFormData({
         ...formData,
         course_id: item.id,
-        course_fee: item.regular_price,
+        course_fee: parseFloat(item.regular_price),
         course_qty: item.quantity,
         total_course_fee: item.regular_price * item.quantity,
-        discount_course_fee: item.discount_price,
+        discount_course_fee: parseFloat(item.discount_price),
         sub_total_course_fee: item.discount_price * item.quantity,
       });
     }
@@ -78,8 +81,8 @@ const Checkout = () => {
   const handleChange = (event) => {
     const { id, value } = event.target;
 
-    if (id === "image") {
-      setFormData({ ...formData, image: event.target.files[0] });
+    if (id === "photo") {
+      setFormData({ ...formData, photo: event.target.files[0] });
     } else {
       setFormData({ ...formData, [id]: value });
     }
@@ -87,29 +90,40 @@ const Checkout = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
+
+    const data = new FormData();
+    Object.keys(formData).forEach((key) => {
+      if (key === "photo") {
+        data.append(key, formData[key]);
+      } else {
+        data.append(key, formData[key]);
+      }
+    });
+
     try {
-      const accessToken =
+      const token =
         "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI5ZDRjMWI5NS1mODRiLTRlOTMtOTM0ZC0xYzc3Y2M5MTY0YTMiLCJqdGkiOiI0NmRkYzc2OWFlZDU4ZmVhZmNiOTYyZGNiYmVkYzI2ZDI1NDUzYThlY2IxMWIwYzQyMzc4ZTVmNTZlZTQ4ZTQ4M2JmYTJmZDRhMDM5OWVjMyIsImlhdCI6MTcyOTU4ODUwMy4zOTg2OTEsIm5iZiI6MTcyOTU4ODUwMy4zOTg2OTUsImV4cCI6MTc2MTEyNDUwMy4zODY1NjYsInN1YiI6IjI1Iiwic2NvcGVzIjpbXX0.QrlPmGrZ8Jyqwba1Cwcc6KAbOmmmM7NkEyCRtQzbV7Z6gGcs-uXl15IA92cQVI3sKnp6-x8pAx4H4VPJ8IZLC9Idlsf9_SG7NZq4gI-7fsTpOIk138hmgaZtSAERs4KGAWGGhYJOETcE207lKZHwqYZGVBAZmYua5mtdmFp_VveXEIxTW1yg09EeMsVzKTWV0RlQ5OBOLqI_KqI7Hc3xjTwYBxS3vHzjwGYi-Szbf2wrU0j9iatQ-DP1uDFL0a2ILCd8CQrrs9WT7nTEX7OzpWOsILjvZXDEBOAZpJ6ALPW57arkcrWjF9PgD__9sEvuaelRRVC967QI6-f7LA7xo1oGmsDa2VXjTZV-liasIw_yPh86Vri-mpP3mValYKKclLN8oZhD92qRXbxMZoYeoSW6F5hTK9xrK9-0IsXqj9r2xkSmHGf0ZtTrOo-FztH5wqumZfkoSU4C6Ad3K_k5y-_en5O6CMgOyh9t9jXm97KUgs2yUmDq0JMgUWVY6bqXM2_IhONncudWqXD9wd-U9ULlrk9izzWhFNiS8VOSP36mAvtvXxYj7TfObOM72U7c-w5-pxoR-1EHx7daRbz0ZZfvAqGbz9i8nnAaijiss6BxEKftuPjwFqeK99yc2W3PEdjBvlu3HzKe3s7bwXtoGBMyp8ZnrbFe4cmE9yQ43Tg";
       const response = await axios.post(
         "https://itder.com/api/course-purchase",
-        formData,
+        data,
         {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
           },
         }
       );
-      toast.success("Order placed successfully!");
-      console.log(response.data);
-    } catch (error) {
-      if (error.response && error.response.data) {
-        toast.error(`Error: ${error.response.data.message}`);
-      } else {
-        toast.error("An error occurred while processing your order.");
+      console.log(response);
+      if (response.data.status_code === 201) {
+        console.log("Setting purchase data:", response.coursePurchaseData);
+        setPurchaseData(response.data.coursePurchaseData);
+        navigate("/order-details");
       }
-      console.error(error);
+      toast.success("Form submitted successfully!");
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || error.message || "Submission failed";
+      toast.error(`Error: ${errorMessage}`);
     }
   };
 
