@@ -44,7 +44,7 @@ const Search = () => {
           placeholder="Form Number"
           value={formNo}
           onChange={(e) => setFormNo(e.target.value)}
-          className="text-black p-2 w-full block h-full outline-0 rounded-[4px] border"
+          className="text-black p-3 w-full block h-full outline-0 rounded-lg border"
         />
         <input
           type="text"
@@ -52,10 +52,10 @@ const Search = () => {
           placeholder="Phone Number"
           value={phoneNo}
           onChange={(e) => setPhoneNo(e.target.value)}
-          className="text-black p-2 w-full block h-full outline-0 rounded-[4px] border mt-2"
+          className="text-black p-3 w-full block h-full outline-0 rounded-lg border mt-2"
         />
         <button
-          className="text-2xl text-black cursor-pointer border py-2 w-[485px]"
+          className="text-2xl text-black cursor-pointer border py-2 w-[485px] hover:bg-[#06284B] hover:text-white rounded-lg"
           onClick={handleSearch}
         >
           Search
